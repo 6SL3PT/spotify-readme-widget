@@ -1,14 +1,25 @@
 package views
 
-templ Index(title, message string) {
+import "github.com/6sl3pt/spotify-readme-widget/services"
+
+templ Index(track services.Track, isFound bool) {
     <html>
         <head>
-            <title>Test</title>
+            <title>Spotify Now Playing</title>
         </head>
         <body>
-            @Header(title)
+            if isFound {
+              @Title("Currently play")
+              @Message(track.Name)
+              @Message("by " + track.Artists[0].Name)
 
-            @Message(message)
+              if len(track.Album.Images) > 0 {
+                @Image(track.Album.Images[0].Url)
+              }
+            } else {
+              @Title("Error")
+              @Message("Not found")
+            }
         </body>
     </html>
 }
