@@ -8,7 +8,7 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-func Message(text string) templ.Component {
+func Styles() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -29,20 +29,7 @@ func Message(text string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"message\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		var templ_7745c5c3_Var2 string
-		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(text)
-		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/message.templ`, Line: 5, Col: 13}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style type=\"text/css\">\n    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900');\n  \n    .container {\n      display: flex;\n      background-size: cover;\n      background-repeat: no-repeat;\n      background-position: center center;\n      width: 100%;\n      height: 100%;\n    }\n    .blur-bg {\n      backdrop-filter: blur(20px);\n      width: 100%;\n    }\n    .text {\n      font-family: 'Montserrat', 'Verdana';\n      display: flex;\n      flex-direction: column;\n      gap: 10px;\n      width: 100%;\n      padding: 45px 20px;\n      text-align: center;\n      text-wrap: nowrap;\n    }\n    .song-name {\n      color: white;\n      font-size: 20px;\n      font-weight: bold;\n    }\n    .artist-name {\n      font-size: 16px;\n      color: rgba(255, 255, 255, 0.6);\n    }\n    .ellipsis {\n      overflow: hidden;\n      text-overflow: ellipsis;\n    }\n    p {\n      margin: 0;\n    }\n  </style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

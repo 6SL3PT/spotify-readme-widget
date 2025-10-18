@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"reflect"
+	"bytes"
 
 	"github.com/6sl3pt/spotify-readme-widget/services"
 	"github.com/6sl3pt/spotify-readme-widget/views"
@@ -26,7 +26,7 @@ func NewSpotifyHandler(ss SpotifyService) *SpotifyHandler {
 
 func (h SpotifyHandler) HandlerShowWidget(c echo.Context) error  {
 	track, err := h.SpotifyServices.GetTrack()	
-	if err != nil || reflect.DeepEqual(track, services.Track{}) {
+	if err != nil {
 		cmp := views.Index(track, false)
 		return h.View(c, cmp)
 	}
@@ -35,8 +35,30 @@ func (h SpotifyHandler) HandlerShowWidget(c echo.Context) error  {
 	return h.View(c, cmp)
 }
 
-func (h SpotifyHandler) View(c echo.Context, cmp templ.Component) error {
-	c.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
+//func (h SpotifyHandler) View(c echo.Context, cmp templ.Component) error {
+//	c.Response().Header().Set(echo.HeaderContentType, "image/svg+xml")
 
-	return cmp.Render(c.Request().Context(), c.Response().Writer)
+//	return cmp.Render(c.Request().Context(), c.Response().Writer)
+//}
+
+func (h SpotifyHandler) View(c echo.Context, cmp templ.Component) error {
+	var buf bytes.Buffer
+
+	// Render to buffer
+	err := cmp.Render(c.Request().Context(), &buf)
+	if err != nil {
+		return echo.NewHTTPError(500, "Failed to render SVG: "+err.Error())
+	}
+
+	// Set proper content type for SVG blob
+	c.Response().Header().Set(echo.HeaderContentType, "image/svg+xml")
+	c.Response().WriteHeader(200)
+
+	// Write the buffer to response
+	_, err = buf.WriteTo(c.Response().Writer)
+	if err != nil {
+		return echo.NewHTTPError(500, "Failed to write SVG to response: "+err.Error())
+	}
+
+	return nil
 }

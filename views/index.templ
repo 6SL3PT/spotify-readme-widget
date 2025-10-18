@@ -3,23 +3,31 @@ package views
 import "github.com/6sl3pt/spotify-readme-widget/services"
 
 templ Index(track services.Track, isFound bool) {
-    <html>
-        <head>
-            <title>Spotify Now Playing</title>
-        </head>
-        <body>
-            if isFound {
-              @Title("Currently play")
-              @Message(track.Name)
-              @Message("by " + track.Artists[0].Name)
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml"
+    width="500" height="300" 
+    fill="none"
+  >
+    @Styles()
 
-              if len(track.Album.Images) > 0 {
-                @Image(track.Album.Images[0].Url)
-              }
-            } else {
-              @Title("Error")
-              @Message("Not found")
-            }
-        </body>
-    </html>
+    <defs>
+      <clipPath id="canvas">
+        <rect width="100%" height="100%" rx="10"/>
+      </clipPath>
+    </defs>
+
+    <foreignObject x="0" y="0" width="100%" height="100%" clip-path="url(#canvas)">
+      if isFound {
+        @TrackWidget(track)
+      } else {
+        @NotFoundWidget()
+      }
+    </foreignObject>
+
+    <g transform="translate(410,130)">
+      @SpotifyIcon("0.1")
+    </g>
+  </svg>
 }
