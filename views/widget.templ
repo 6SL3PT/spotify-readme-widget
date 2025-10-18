@@ -2,14 +2,14 @@ package views
 
 import "github.com/6sl3pt/spotify-readme-widget/services"
 
-templ TrackWidget(track services.Track) {
-  <xhtml:div class="container" style={ "background-image: url(" + track.Album.Images[0].Url + ");" }>
+templ TrackWidget(track services.TrackSvg) {
+  <xhtml:div class="container" style={ "background-image: url(" + track.Image + ");" }>
     <xhtml:div class="blur-bg text" style="transform: translateY(50%);">
       <xhtml:p class="song-name ellipsis">
         {track.Name}
       </xhtml:p>
       <xhtml:p class="artist-name ellipsis">
-        {track.Artists[0].Name}
+        {track.Artist}
       </xhtml:p>
     </xhtml:div>
   </xhtml:div>

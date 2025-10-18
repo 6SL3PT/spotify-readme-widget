@@ -20,7 +20,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// Initialize
 	as := services.NewApiService()
-	ss := services.NewSpotifyService(as)
+	is := services.NewImageService()
+	ss := services.NewSpotifyService(as, is)
 	h := handlers.NewSpotifyHandler(ss)
 	
 	// Setup route

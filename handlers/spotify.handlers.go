@@ -11,7 +11,7 @@ import (
 )
 
 type SpotifyService interface {
-	GetTrack() (services.Track, error)
+	GetTrack() (services.TrackSvg, error)
 }
 
 type SpotifyHandler struct {
