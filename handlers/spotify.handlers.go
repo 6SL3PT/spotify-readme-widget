@@ -35,12 +35,6 @@ func (h SpotifyHandler) HandlerShowWidget(c echo.Context) error  {
 	return h.View(c, cmp)
 }
 
-//func (h SpotifyHandler) View(c echo.Context, cmp templ.Component) error {
-//	c.Response().Header().Set(echo.HeaderContentType, "image/svg+xml")
-
-//	return cmp.Render(c.Request().Context(), c.Response().Writer)
-//}
-
 func (h SpotifyHandler) View(c echo.Context, cmp templ.Component) error {
 	var buf bytes.Buffer
 
