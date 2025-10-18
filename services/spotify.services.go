@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -44,32 +43,40 @@ type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
 }
 
-type SpotifyServices struct {}
+type ApiService interface {
+	FetchApi(req *http.Request) ([]byte, error)
+}
 
-func NewSpotifyService() *SpotifyServices {
-	return &SpotifyServices{}
+type SpotifyServices struct {
+	ApiServices ApiService
+}
+
+func NewSpotifyService(as ApiService) *SpotifyServices {
+	return &SpotifyServices{
+		ApiServices: as,
+	}
 }
 
 func (ss SpotifyServices) GetTrack() (Track, error) {
-	accessToken, err := refreshToken()
+	accessToken, err := ss.refreshToken()
 	if err != nil {
 		return Track{}, fmt.Errorf("Failed to refresh token: %w", err)
 	}
 
 	// Get currently play track
-	if track, err := getCurrentlyPlayingTrack(accessToken); err == nil {
+	if track, err := ss.getCurrentlyPlayingTrack(accessToken); err == nil {
 		return track, nil
 	}
 
 	// Get recently play track, in case there's no track playing at fetching time
-	if track, err := getRecentlyPlayedTrack(accessToken); err == nil {
+	if track, err := ss.getRecentlyPlayedTrack(accessToken); err == nil {
 		return track, nil
 	}
 
 	return Track{}, errors.New("Failed to retrieve both currently and recently played tracks")
 }
 
-func getCurrentlyPlayingTrack(token string) (Track, error) {
+func (ss SpotifyServices) getCurrentlyPlayingTrack(token string) (Track, error) {
 	// Fetch data
 	req, err := http.NewRequest("GET", currentlyPlayingURL, nil)
 	if err != nil {
@@ -77,7 +84,7 @@ func getCurrentlyPlayingTrack(token string) (Track, error) {
 	}
 	req.Header.Set("Authorization", "Bearer " + token)
 	
-	body, err := fetchApi(req)
+	body, err := ss.ApiServices.FetchApi(req)
 	if err != nil {
 		return Track{}, err
 	}
@@ -91,7 +98,7 @@ func getCurrentlyPlayingTrack(token string) (Track, error) {
 	return response.Item, nil
 }
 
-func getRecentlyPlayedTrack(token string) (Track, error) {
+func (ss SpotifyServices) getRecentlyPlayedTrack(token string) (Track, error) {
 	// Fetch data
 	req, err := http.NewRequest("GET", recentlyPlayedURL, nil)
 	if err != nil {
@@ -99,7 +106,7 @@ func getRecentlyPlayedTrack(token string) (Track, error) {
 	}
 	req.Header.Set("Authorization", "Bearer " + token)
 	
-	body, err := fetchApi(req)
+	body, err := ss.ApiServices.FetchApi(req)
 	if err != nil {
 		return Track{}, err
 	}
@@ -117,7 +124,7 @@ func getRecentlyPlayedTrack(token string) (Track, error) {
 	return response.Items[0].Track, nil
 }
 
-func refreshToken() (string, error) {
+func (ss SpotifyServices) refreshToken() (string, error) {
 	clientId := os.Getenv("SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
 	refreshToken := os.Getenv("SPOTIFY_REFRESH_TOKEN")
@@ -135,7 +142,7 @@ func refreshToken() (string, error) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Basic " + encodedAuth)
 
-	body, err := fetchApi(req)
+	body, err := ss.ApiServices.FetchApi(req)
 	if err != nil {
 		return "", err
 	}
@@ -148,25 +155,3 @@ func refreshToken() (string, error) {
 
 	return response.AccessToken, nil
 }
-
-func fetchApi(req *http.Request) ([]byte, error) {
-	// Handle response
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("Request error: %w", err)
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API call failed with status %d: %s", res.StatusCode, req.URL.String())
-	}
-
-	// Retrieve body
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to read body: %w", err)
-	}
-
-	return body, nil
-}
-
