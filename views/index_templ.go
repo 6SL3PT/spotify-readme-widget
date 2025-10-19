@@ -39,30 +39,68 @@ func Index(track services.TrackSvg, isFound bool, errMsg string) templ.Component
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<defs><clipPath id=\"canvas\"><rect width=\"100%\" height=\"100%\" rx=\"10\"></rect></clipPath></defs> <foreignObject x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" clip-path=\"url(#canvas)\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<defs><clipPath id=\"canvas\"><rect width=\"100%\" height=\"100%\" rx=\"10\"></rect></clipPath> <filter id=\"blur\"><feGaussianBlur color-interpolation-filters=\"sRGB\" stdDeviation=\"20\"></feGaussianBlur> <feOffset width=\"100%\" x=\"0\" y=\"50%\"></feOffset> <feComponentTransfer><feFuncA tableValues=\"1 1\" type=\"discrete\"></feFuncA></feComponentTransfer> <feComposite in2=\"SourceGraphic\" operator=\"atop\"></feComposite></filter> <linearGradient id=\"default\" x1=\"0\" x2=\"0\" y1=\"0\" y2=\"1\"><stop offset=\"0%\" stop-color=\"#020024\"></stop> <stop offset=\"50%\" stop-color=\"#090979\"></stop> <stop offset=\"100%\" stop-color=\"#00D4FF\"></stop></linearGradient></defs> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if isFound {
-			templ_7745c5c3_Err = TrackWidget(track).Render(ctx, templ_7745c5c3_Buffer)
+		if track.Image == "" {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<rect clip-path=\"url(#canvas)\" fill=\"url(#default)\" x=\"0\" y=\"0\" width=\"100%\" height=\"100%\"></rect> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = NotFoundWidget(errMsg).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<image clip-path=\"url(#canvas)\" filter=\"url(#blur)\" y=\"-50%\" width=\"100%\" xlink:href=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var2 string
+			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(track.Image)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/index.templ`, Line: 44, Col: 53}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\"></image> ")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</foreignObject> <g transform=\"translate(410,130)\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "<foreignObject x=\"0\" y=\"0\" width=\"100%\" height=\"100%\" clip-path=\"url(#canvas)\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = SpotifyIcon("0.1").Render(ctx, templ_7745c5c3_Buffer)
+		if isFound {
+			templ_7745c5c3_Err = TrackFoundWidget(track).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = TrackNotFoundWidget(errMsg).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</foreignObject> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</g></svg>")
+		if isFound {
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<g transform=\"translate(410,125)\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = SpotifyIcon("0.1").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</g>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</svg>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

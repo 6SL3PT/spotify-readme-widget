@@ -2,9 +2,12 @@ package views
 
 import "github.com/6sl3pt/spotify-readme-widget/services"
 
-templ TrackWidget(track services.TrackSvg) {
-  <xhtml:div class="container" style={ getBackground(track.Image) }>
-    <xhtml:div class="blur-bg text" style="transform: translateY(50%);">
+templ TrackFoundWidget(track services.TrackSvg) {
+  <xhtml:div class="container">
+    <xhtml:div
+      class="text"
+      style="height: 100%; transform: translateY(60%);"
+    >
       <xhtml:p class="song-name ellipsis">
         {track.Name}
       </xhtml:p>
@@ -15,16 +18,10 @@ templ TrackWidget(track services.TrackSvg) {
   </xhtml:div>
 }
 
-templ NotFoundWidget(errMsg string) {
-  <xhtml:div class="container" style={ getBackground("") }>
-    <xhtml:p>{errMsg}</xhtml:p>
+templ TrackNotFoundWidget(errMsg string) {
+  <xhtml:div class="container">
+    <xhtml:div class="text error">
+      <xhtml:p>{errMsg}</xhtml:p>
+    </xhtml:div>
   </xhtml:div>
-}
-
-func getBackground(b64Image string) string {
-  if b64Image == "" {
-    return "background: linear-gradient(180deg,rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 50%, rgba(0, 212, 255, 1) 100%);"
-  }
-
-  return "background-image: url(" + b64Image + ");"
 }

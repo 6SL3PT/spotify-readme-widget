@@ -2,27 +2,16 @@ package views
 
 templ Styles() {
   <style type="text/css">
-    @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900');
-  
     .container {
-      display: flex;
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center center;
       width: 100%;
       height: 100%;
     }
-    .blur-bg {
-      backdrop-filter: blur(20px);
-      width: 100%;
-    }
     .text {
-      font-family: 'Montserrat', 'Verdana';
+      font-family: 'Verdana';
       display: flex;
       flex-direction: column;
       gap: 10px;
-      width: 100%;
-      padding: 45px 20px;
+      padding: 0 20px;
       text-align: center;
       text-wrap: nowrap;
     }
@@ -38,6 +27,12 @@ templ Styles() {
     .ellipsis {
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .error {
+      background-color: red;
+      color: white;
+      word-wrap: break-word;
+      text-wrap: unset !important;
     }
     p {
       margin: 0;

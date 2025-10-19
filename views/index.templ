@@ -16,18 +16,47 @@ templ Index(track services.TrackSvg, isFound bool, errMsg string) {
       <clipPath id="canvas">
         <rect width="100%" height="100%" rx="10"/>
       </clipPath>
+
+      <filter id="blur">
+        <feGaussianBlur color-interpolation-filters="sRGB" stdDeviation="20"/>
+        <feOffset width="100%" x="0" y="50%"/>
+        <feComponentTransfer>
+          <feFuncA tableValues="1 1" type="discrete" />
+        </feComponentTransfer> 
+        <feComposite in2="SourceGraphic" operator="atop" />
+      </filter>
+
+      <linearGradient id="default" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#020024"/>
+        <stop offset="50%" stop-color="#090979"/>
+        <stop offset="100%" stop-color="#00D4FF"/>
+      </linearGradient>
     </defs>
+
+    if track.Image == "" {
+      <rect
+        clip-path="url(#canvas)" fill="url(#default)"
+        x="0" y="0" width="100%" height="100%"
+      />
+    } else {
+      <image
+        clip-path="url(#canvas)" filter="url(#blur)"
+        y="-50%" width="100%" xlink:href={track.Image}
+      />
+    }
 
     <foreignObject x="0" y="0" width="100%" height="100%" clip-path="url(#canvas)">
       if isFound {
-        @TrackWidget(track)
+        @TrackFoundWidget(track)
       } else {
-        @NotFoundWidget(errMsg)
+        @TrackNotFoundWidget(errMsg)
       }
     </foreignObject>
 
-    <g transform="translate(410,130)">
-      @SpotifyIcon("0.1")
-    </g>
+    if isFound {
+      <g transform="translate(410,125)">
+        @SpotifyIcon("0.1")
+      </g>
+    }
   </svg>
 }
