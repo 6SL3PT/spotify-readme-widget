@@ -2,7 +2,7 @@ package views
 
 import "github.com/6sl3pt/spotify-readme-widget/services"
 
-templ Index(track services.TrackSvg, isFound bool) {
+templ Index(track services.TrackSvg, isFound bool, errMsg string) {
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -22,7 +22,7 @@ templ Index(track services.TrackSvg, isFound bool) {
       if isFound {
         @TrackWidget(track)
       } else {
-        @NotFoundWidget()
+        @NotFoundWidget(errMsg)
       }
     </foreignObject>
 

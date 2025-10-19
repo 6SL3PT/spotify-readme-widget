@@ -19,9 +19,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	e.Pre(middleware.StripPrefixMiddleware(vercelPrefix))
 
 	// Initialize
-	as := services.NewApiService()
-	is := services.NewImageService()
-	ss := services.NewSpotifyService(as, is)
+	ss := services.NewSpotifyService()
 	h := handlers.NewSpotifyHandler(ss)
 	
 	// Setup route

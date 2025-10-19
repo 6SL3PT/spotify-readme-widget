@@ -6,13 +6,7 @@ import (
 	"net/http"
 )
 
-type ApiServices struct {}
-
-func NewApiService() *ApiServices {
-	return &ApiServices{}
-}
-
-func (as ApiServices) FetchApi(req *http.Request) ([]byte, error) {
+func FetchApi(req *http.Request) ([]byte, error) {
 	// Handle response
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {

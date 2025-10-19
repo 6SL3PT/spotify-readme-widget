@@ -17,78 +17,30 @@ const (
 	tokenURL            = "https://accounts.spotify.com/api/token"
 )
 
-type TrackSvg struct {
-	Name      string
-	Artist    string
-	Image     string
+func NewSpotifyService() *SpotifyService {
+	return &SpotifyService{}
 }
 
-type Track struct {
-	Name      string `json:"name"`
-	Artists []struct {
-		Name    string `json:"name"`
-	} `json:"artists"`
-	Album     struct {
-		Images []struct {
-			Url     string `json:"url"`
-		} `json:"images"`
-	} `json:"album"`
-}
-
-type CurrentlyPlayingResponse struct {
-	Item      Track  `json:"item"`
-}
-
-type RecentlyPlayedResponse struct {
-	Items []struct {
-		Track   Track  `json:"track"`
-	} `json:"items"`
-}
-
-type AccessTokenResponse struct {
-	AccessToken string `json:"access_token"`
-}
-
-type ApiService interface {
-	FetchApi(req *http.Request) ([]byte, error)
-}
-
-type ImageService interface {
-	UrlToBase64(url string) (string, error)
-}
-
-type SpotifyServices struct {
-	ApiServices   ApiService
-	ImageServices ImageService
-}
-
-func NewSpotifyService(as ApiService, is ImageService) *SpotifyServices {
-	return &SpotifyServices{
-		ApiServices: as,
-		ImageServices: is,
-	}
-}
-
-func (ss SpotifyServices) GetTrack() (TrackSvg, error) {
-	accessToken, err := ss.refreshToken()
+func (ss SpotifyService) GetTrack() (TrackSvg, error) {
+	accessToken, err := refreshToken()
 	if err != nil {
 		return TrackSvg{}, fmt.Errorf("Failed to refresh token: %w", err)
 	}
 
 	// Get currently play track
-	if track, err := ss.getCurrentlyPlayingTrack(accessToken); err == nil {
+	if track, err := getCurrentlyPlayingTrack(accessToken); err == nil {
 		return track, nil
 	}
 
 	// Get recently play track, in case there's no track playing at fetching time
-	if track, err := ss.getRecentlyPlayedTrack(accessToken); err == nil {
+	if track, err := getRecentlyPlayedTrack(accessToken); err == nil {
 		return track, nil
 	}
 
 	return TrackSvg{}, errors.New("Failed to retrieve both currently and recently played tracks")
 }
 
-func (ss SpotifyServices) getCurrentlyPlayingTrack(token string) (TrackSvg, error) {
+func getCurrentlyPlayingTrack(token string) (TrackSvg, error) {
 	// Fetch data
 	req, err := http.NewRequest("GET", currentlyPlayingURL, nil)
 	if err != nil {
@@ -96,7 +48,7 @@ func (ss SpotifyServices) getCurrentlyPlayingTrack(token string) (TrackSvg, erro
 	}
 	req.Header.Set("Authorization", "Bearer " + token)
 	
-	body, err := ss.ApiServices.FetchApi(req)
+	body, err := FetchApi(req)
 	if err != nil {
 		return TrackSvg{}, err
 	}
@@ -107,10 +59,10 @@ func (ss SpotifyServices) getCurrentlyPlayingTrack(token string) (TrackSvg, erro
 		return TrackSvg{}, fmt.Errorf("Failed to parse currently playing response: %w", err)
 	}
 
-	return ss.mapTrackToTrackSvg(response.Item)
+	return mapTrackToTrackSvg(response.Item), nil
 }
 
-func (ss SpotifyServices) getRecentlyPlayedTrack(token string) (TrackSvg, error) {
+func getRecentlyPlayedTrack(token string) (TrackSvg, error) {
 	// Fetch data
 	req, err := http.NewRequest("GET", recentlyPlayedURL, nil)
 	if err != nil {
@@ -118,7 +70,7 @@ func (ss SpotifyServices) getRecentlyPlayedTrack(token string) (TrackSvg, error)
 	}
 	req.Header.Set("Authorization", "Bearer " + token)
 	
-	body, err := ss.ApiServices.FetchApi(req)
+	body, err := FetchApi(req)
 	if err != nil {
 		return TrackSvg{}, err
 	}
@@ -133,19 +85,17 @@ func (ss SpotifyServices) getRecentlyPlayedTrack(token string) (TrackSvg, error)
 		return TrackSvg{}, errors.New("No recently played tracks found")
 	}
 
-	return ss.mapTrackToTrackSvg(response.Items[0].Track)
+	return mapTrackToTrackSvg(response.Items[0].Track), nil
 }
 
-func (ss SpotifyServices) mapTrackToTrackSvg(track Track) (TrackSvg, error) {
-	b64Image, err := ss.ImageServices.UrlToBase64(track.Album.Images[0].Url)
-	if err != nil {
-		return TrackSvg{}, fmt.Errorf("Failed to convert image url to base64: %w", err)
-	}
+func mapTrackToTrackSvg(track Track) TrackSvg {
+	imageService := NewImageService(track.Album.Images[0].Url)
+	b64Image, _ := imageService.GetBase64()
 
-	return TrackSvg{Name: track.Name, Artist: track.Artists[0].Name, Image: b64Image}, nil
+	return TrackSvg{Name: track.Name, Artist: track.Artists[0].Name, Image: b64Image}
 }
 
-func (ss SpotifyServices) refreshToken() (string, error) {
+func refreshToken() (string, error) {
 	clientId := os.Getenv("SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
 	refreshToken := os.Getenv("SPOTIFY_REFRESH_TOKEN")
@@ -163,7 +113,7 @@ func (ss SpotifyServices) refreshToken() (string, error) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Authorization", "Basic " + encodedAuth)
 
-	body, err := ss.ApiServices.FetchApi(req)
+	body, err := FetchApi(req)
 	if err != nil {
 		return "", err
 	}

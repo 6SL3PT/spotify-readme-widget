@@ -10,28 +10,24 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type SpotifyService interface {
-	GetTrack() (services.TrackSvg, error)
-}
-
 type SpotifyHandler struct {
-	SpotifyServices SpotifyService
+	SpotifyService services.ISpotifyService
 }
 
-func NewSpotifyHandler(ss SpotifyService) *SpotifyHandler {
+func NewSpotifyHandler(ss services.ISpotifyService) *SpotifyHandler {
 	return &SpotifyHandler{
-		SpotifyServices: ss,
+		SpotifyService: ss,
 	}
 }
 
 func (h SpotifyHandler) HandlerShowWidget(c echo.Context) error  {
-	track, err := h.SpotifyServices.GetTrack()	
+	track, err := h.SpotifyService.GetTrack()	
 	if err != nil {
-		cmp := views.Index(track, false)
+		cmp := views.Index(track, false, err.Error())
 		return h.View(c, cmp)
 	}
 
-	cmp := views.Index(track, true)	
+	cmp := views.Index(track, true, "")	
 	return h.View(c, cmp)
 }
 
